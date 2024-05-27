@@ -7,116 +7,97 @@
         <div class="btn-top">
 			
             <div class="section-1">
-                <router-link to="/sell" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        shopping_cart_checkout
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Sell</h2>
-                            <h3>(Cash)</h3>
-                        </div>
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    <img :src="cartSrc" alt="">
+                    </span>
+                    <div class="pelet1cont">
+                        <h3>DAIRY MS</h3>
                     </div>
-                </router-link>
+                </div>
 
-                <router-link to="/sell/creditSales" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        shopping_cart_checkout
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Sell</h2>
-                            <h3>(Credit)</h3>
-                        </div>
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    shopping_cart_checkout
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Sell</h2>
+                        <h3>(Credit)</h3>
                     </div>
-                </router-link>
+                </div>
 
-                <router-link to="/purchase" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        shopping_cart
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Buy</h2>
-                        </div>
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    shopping_cart
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Buy</h2>
                     </div>
-                </router-link>
+                </div>
+    
             </div>
 
            <div class="section-2">
-                <router-link to="/Manage/Customers" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        add_circle
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Customers</h2>
-                        </div>
-                    </div>
-                </router-link>
 
-                <router-link to="/Manage/Suppliers" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        add_circle
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Suppliers</h2>
-                        </div>
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    add_circle
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Customers</h2>
                     </div>
-                </router-link>
+                </div>
+        
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    add_circle
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Suppliers</h2>
+                    </div>
+                </div>
 
-                <router-link to="/Manage" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        add_circle
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Products</h2>
-                        </div>
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    add_circle
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Products</h2>
                     </div>
-                </router-link>
+                </div>
            </div>
 
             <div class="section-3">
-                <router-link to="/Manage/Stores" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        add_circle
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Stores</h2>
-                        </div>
+        
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    <img :src="cartSrc" alt="">
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Stores</h2>
                     </div>
-                </router-link>
+                </div>
             
-                <router-link to="/Manage/Users" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        add_circle
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Users</h2>
-                        </div>
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    add_circle
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Users</h2>
                     </div>
-                </router-link>
-                
-                <router-link to="#" class="router-pelet1">
-                    <div class="pelet1">
-                        <span class="material-symbols-outlined">
-                        power_settings_new
-                        </span>
-                        <div class="pelet1cont">
-                            <h2>Logout</h2>
-                        </div>
+                </div>
+            
+                <div class="pelet1">
+                    <span class="material-symbols-outlined">
+                    power_settings_new
+                    </span>
+                    <div class="pelet1cont">
+                        <h2>Logout</h2>
                     </div>
-                </router-link>
+                </div>
 
             </div>
 
-
-
-         
         </div>
 
 			<router-view></router-view>
@@ -129,7 +110,8 @@ export default{
 	data(){
 		return {
             // logoSrc: 'src/components/icons/samis.png',
-            cartSrc: 'src/assets/cart.png'
+            cartSrc: 'src/assets/logo.png',
+            dairySrc: 'src/assets/dairy-ms.jpg'
 		}
 	},
 
@@ -155,18 +137,17 @@ export default{
     background-color: white;
     color: teal;
     text-align: center;
-    justify-content: center;
-    align-items: center;
-    padding: 1.5rem;
-    width: 15rem;
+    /* justify-content: center; */
+    /* align-items: center; */
+    padding: 3.5rem;
+    width: 20rem;
     border-radius: 8px;
     box-shadow: 0px 0px 5px rgba(74,222,128,255);
-    display: flex;
+    /* display: flex; */
     gap: .3rem;
     cursor: pointer;
     /* grid-template-columns: repeat(2, 2fr); */
     text-decoration: none;
-
     
 }
 .pelet1:hover{
