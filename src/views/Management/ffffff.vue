@@ -10,7 +10,51 @@ export default{
     data(){
         return {
             products: [],
-            schools: []
+            schools: [],
+            projects: [
+          {
+            id: 1,
+            picture: 'src/assets/dairy-ms.jpg',
+            name: 'Dairy MIS',
+            description: 'A brief description of Project One.',
+            price: '$100',
+          },
+          {
+            id: 2,
+            picture: 'src/assets/attendance2.webp',
+            name: 'Class Attendance App',
+            description: 'A brief description of Project Two.',
+            price: '$200',
+          },
+          {
+            id: 3,
+            picture: 'src/assets/e-commerce.webp',
+            name: 'E-commerce MS',
+            description: 'A brief description of Project Three.',
+            price: '$300',
+          },
+          {
+            id: 4,
+            picture: 'src/assets/inventory.webp',
+            name: 'Inventory MS',
+            description: 'A brief description of Project Three.',
+            price: '$300',
+          },
+          {
+            id: 5,
+            picture: 'src/assets/POS.webp',
+            name: 'POS',
+            description: 'A brief description of Project Three.',
+            price: '$300',
+          },
+          {
+            id: 6,
+            picture: 'src/assets/E-commerce2.webp',
+            name: 'Techy',
+            description: 'A brief description of Project Three.',
+            price: '$300',
+          },
+        ],
         };
     },
 
