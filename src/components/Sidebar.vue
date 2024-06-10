@@ -15,10 +15,13 @@
 			
 			<router-link to="/" class="button">
 				<span class="material-icons">home</span>
-				<span class="text">All-Projects</span>
+				<span class="text">HOME</span>
 			</router-link>
 
-
+			<router-link to="/projects" class="button">
+				<span class="material-icons">token</span>
+				<span class="text">PROJECTS</span>
+			</router-link>
 			
 		</div>
 	</aside>

@@ -1,215 +1,164 @@
 <template>
-	<main id="manage-page">
-		<div class="page-header">
-            <h2>Homepage</h2>
+  <main id="manage-page">
+    <div class="page-wrap">
+      <div class="page-header">
+        <h3>Available-Projects</h3>
+      </div>
+
+      <div class="project-list">
+        <div class="project-card" v-for="project in projects" :key="project.id">
+          <img :src="project.picture" alt="Project Image" class="project-image" />
+          <div class="project-details">
+            <h2 class="project-name">{{ project.name }}</h2>
+            <p class="project-description">{{ project.description }}</p>
+            <p class="project-price">{{ project.price }}</p>
+          </div>
         </div>
+      </div>
 
-        <div class="btn-top">
-			
-            <div class="section-1">
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    <img :src="cartSrc" alt="">
-                    </span>
-                    <div class="pelet1cont">
-                        <h3>DAIRY MS</h3>
-                    </div>
-                </div>
+    </div>
 
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    shopping_cart_checkout
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Sell</h2>
-                        <h3>(Credit)</h3>
-                    </div>
-                </div>
-
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    shopping_cart
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Buy</h2>
-                    </div>
-                </div>
-    
-            </div>
-
-           <div class="section-2">
-
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    add_circle
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Customers</h2>
-                    </div>
-                </div>
-        
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    add_circle
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Suppliers</h2>
-                    </div>
-                </div>
-
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    add_circle
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Products</h2>
-                    </div>
-                </div>
-           </div>
-
-            <div class="section-3">
-        
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    <img :src="cartSrc" alt="">
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Stores</h2>
-                    </div>
-                </div>
-            
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    add_circle
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Users</h2>
-                    </div>
-                </div>
-            
-                <div class="pelet1">
-                    <span class="material-symbols-outlined">
-                    power_settings_new
-                    </span>
-                    <div class="pelet1cont">
-                        <h2>Logout</h2>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-			<router-view></router-view>
-	</main>
+  </main>
 </template>
 
 <script>
 
-export default{
-	data(){
-		return {
-            // logoSrc: 'src/components/icons/samis.png',
-            cartSrc: 'src/assets/logo.png',
-            dairySrc: 'src/assets/dairy-ms.jpg'
-		}
-	},
-
-    created() {
-       
-    },
-
-	methods: {
-		
-
-
-	}
-}
+export default {
+  name: 'ProjectList',
+  data() {
+    return {
+      projects: [
+        {
+          id: 1,
+          picture: 'src/assets/dairy-ms.jpg',
+          name: 'Dairy MIS',
+          description: 'A brief description of Project One.',
+          price: '$100',
+        },
+        {
+          id: 2,
+          picture: 'src/assets/attendance2.webp',
+          name: 'C Attendance App',
+          description: 'A brief description of Project Two.',
+          price: '$200',
+        },
+        {
+          id: 3,
+          picture: 'src/assets/e-commerce.webp',
+          name: 'E-commerce MS',
+          description: 'A brief description of Project Three.',
+          price: '$300',
+        },
+        {
+          id: 4,
+          picture: 'src/assets/inventory.webp',
+          name: 'Inventory MS',
+          description: 'A brief description of Project Three.',
+          price: '$300',
+        },
+        {
+          id: 5,
+          picture: 'src/assets/POS.webp',
+          name: 'POS',
+          description: 'A brief description of Project Three.',
+          price: '$300',
+        },
+        {
+          id: 6,
+          picture: 'src/assets/E-commerce2.webp',
+          name: 'Techy',
+          description: 'A brief description of Project Three.',
+          price: '$300',
+        },
+      ],
+    };
+  },
+};
 </script>
 
 <style scoped>
-*{
+* {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-}
-.pelet1{
-    background-color: white;
-    color: teal;
-    text-align: center;
-    /* justify-content: center; */
-    /* align-items: center; */
-    padding: 3.5rem;
-    width: 20rem;
-    border-radius: 8px;
-    box-shadow: 0px 0px 5px rgba(74,222,128,255);
-    /* display: flex; */
-    gap: .3rem;
-    cursor: pointer;
-    /* grid-template-columns: repeat(2, 2fr); */
-    text-decoration: none;
-    
-}
-.pelet1:hover{
-    box-shadow: 0px 0px 5px red;
-}
-.router-pelet1{
-    text-decoration: none;
-}
-/* h2{
-    font-weight: 600;
-    font-family: ui-monospace;
-    font-size: x-large;
-} */
+    font-family: 'Arial', sans-serif;
+  }
 
-.material-symbols-outlined{
-    font-size: 4rem;
+.page-wrap {
+  /* padding: 20px;
+  background-color: #f9f9f9; */
 }
 
-.page-header{
-    color: rgba(30,41,59,255);
+.page-header {
+  /* text-align: center; */
+  margin-bottom: .8rem;
 }
 
-.section-1{
-    display: flex;
-    flex-wrap: wrap;
-    gap: .8rem;
+.page-header h3 {
+  font-size: 1.5em;
+  color: rgba(30, 41, 59, 255);
 }
 
-.section-2{
-    display: flex;
-    flex-wrap: wrap;
-    gap: .8rem;
-    margin-top: .8rem;
+.project-list {
+  display: flex;
+  flex-wrap: wrap;
+  /* justify-content: center; */
+  gap: 20px;
 }
 
-.section-3{
-    display: flex;
-    flex-wrap: wrap;
-    gap: .8rem;
-    margin-top: .8rem;
+.project-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  max-width: 300px;
+  /* text-align: center; */
 }
 
-/* rgba(30,41,59,255)    
-white - rgba(241,245,249,255)    
-green -  rgba(74,222,128,255) */
-
-/* Styles for larger screens */
-@media only screen and (min-width: 768px) {
-    .btn-top{
-      margin-top: 13px;
-      
-    }
+.project-card:hover {
+  transform: translateY(-5px);
 }
 
-/* Styles for smaller screens */
+.project-image {
+  width: 100%;
+  height: auto;
+}
+
+.project-details {
+  /* padding: 20px; */
+  margin: .8rem;
+}
+
+.project-name {
+  font-size: 1.5em;
+  /* margin: 15px 0; */
+  color: #333;
+  margin-bottom: .3rem;
+}
+
+.project-description {
+  font-size: 1em;
+  color: #777;
+  margin-bottom: .3rem;
+}
+
+.project-price {
+  font-size: 1.2em;
+  color: #007bff;
+}
+
 @media only screen and (max-width: 767px) {
-    .btn-top{
-        margin-top: .5rem;
-        padding-left: 1.5rem;
-    }
-    .page-header{
-      padding-left: 1.5rem;
-    }
+  .project-card {
+    /* margin: 10px; */
+    width: 100%;
+  }
+
+  .page-wrap{
+    margin-left: 2.3rem;
+  }
+  .project-list{
+    gap: .8rem;
+  }
 }
 </style>
