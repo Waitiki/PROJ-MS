@@ -297,22 +297,26 @@ input[type="file"]::-webkit-file-upload-button:hover {
 }
 
 .form-actions button:first-child {
+  font-size: medium;
   background: rgba(245, 56, 56, 1);
-  color: white;
+  border: 1px solid rgba(245, 56, 56, 1);
+  color: black;
 }
 
 .form-actions button:first-child:hover {
-  border: 1px solid rgba(245, 56, 56, 1);
   background-color: rgba(30, 41, 59, 255);
+  color: white;
 }
 
 .form-actions button:last-child {
+  font-size: medium;
   background: rgba(74, 222, 128, 1);
-  color: white;
+  border: 1px solid rgba(74, 222, 128, 1);
+  color: black;
 }
 .form-actions button:last-child:hover {
-  border: 1px solid rgba(74, 222, 128, 1);
   background-color: rgba(30, 41, 59, 255);
+  color: white;
 }
 hr {
     border: 1px solid #4ADE80;
