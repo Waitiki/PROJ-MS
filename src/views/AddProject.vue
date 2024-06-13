@@ -29,9 +29,24 @@
           />
           <label for="picture" class="file-label">Project Image</label>
         </div>
-        <div class="image-preview" v-if="formData.picture">
-          <img :src="formData.picture" alt="Project Image Preview" class="preview-image" />
+        <div class="form-group file-group">
+          <input 
+            type="file" 
+            id="projectPdf" 
+            @change="handleZipUpload" 
+            class="form-control-file" 
+            accept=".zip"
+          />
+          <label for="projectPdf" class="file-label">Project Zip Folder</label>
         </div>
+
+        <div class="image-preview" v-if="formData.picture">
+          <img :src="formData.picture" alt="Project Image Preview" class="preview-image"/>
+        </div>
+        <div class="image-preview" v-else-if="project && project.picture">
+          <img :src="`data:image/jpeg;base64,${project.picture}`" alt="Project Image Preview" class="preview-image"/>
+        </div>
+        <div v-else class="no-image-placeholder">No image uploaded</div>
       </div>
       <hr>
       <div class="form-actions">
@@ -65,14 +80,22 @@ export default {
         name: '',
         description: '',
         price: '',
-        picture: ''
+        features: '',
+        overview: '',
+        technologies: '',
+        picture: '',
+        projectPdf: ''
       },
       fields: [
         { key: 'name', label: 'Project Name', type: 'text' },
         { key: 'description', label: 'Project Description', type: 'text' },
         { key: 'price', label: 'Project Price', type: 'text' },
+        { key: 'features', label: 'Project Features', type: 'text' },
+        { key: 'overview', label: 'Project Overview', type: 'text' },
+        { key: 'technologies', label: 'Project Technologies', type: 'text' }
       ],
-      selectedFile: null
+      selectedFile: null,
+      selectedZip: null
     };
   },
   watch: {
@@ -80,9 +103,9 @@ export default {
       immediate: true,
       handler(newValue) {
         if (newValue) {
-          this.formData = { ...newValue, picture: newValue.picture || '' };
+          this.formData = { ...newValue, picture: '', projectPdf: '' }; // Initialize picture and projectPdf as empty for new uploads
         } else {
-          this.formData = { name: '', description: '', price: '', picture: '' };
+          this.formData = { name: '', description: '', price: '', features: '', overview: '', technologies: '', picture: '', projectPdf: '' };
         }
       }
     }
@@ -91,10 +114,25 @@ export default {
     handleFileUpload(event) {
       const file = event.target.files[0];
       if (file && ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
-        this.formData.picture = URL.createObjectURL(file);
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.formData.picture = reader.result; // Update preview with base64 data URL
+        };
+        reader.readAsDataURL(file);
+
         this.selectedFile = file;
       } else {
         this.invokeMenu("Invalid file type. Only PNG, JPEG, JPG, and WEBP are allowed.", "red");
+        event.target.value = '';
+      }
+    },
+    handleZipUpload(event) {
+      const file = event.target.files[0];
+      if (file && file.type === 'application/zip') {
+        this.selectedZip = file;
+        this.formData.projectPdf = file.name; // Show the name of the zip file in the form
+      } else {
+        this.invokeMenu("Invalid file type. Only ZIP is allowed.", "red");
         event.target.value = '';
       }
     },
@@ -108,41 +146,58 @@ export default {
       }, 3000);
     },
     async saveProject() {
-      if (!this.formData.name || !this.formData.description || !this.formData.price ||!this.formData.picture) {
-        this.invokeMenu("FILL ALL FIELDS!!", "red");
+      if (!this.formData.name || !this.formData.description || !this.formData.price || !this.formData.features || !this.formData.overview || !this.formData.technologies || !this.formData.picture || !this.formData.projectPdf) {
+        this.invokeMenu("Fill all fields!", "red");
       } else {
-        this.invokeMenu("SAVING PROJECT DATA...", "blue");
+        this.invokeMenu("Saving project data...", "blue");
 
         const formData = new FormData();
         formData.append('name', this.formData.name);
         formData.append('description', this.formData.description);
         formData.append('price', this.formData.price);
+        formData.append('features', this.formData.features);
+        formData.append('overview', this.formData.overview);
+        formData.append('technologies', this.formData.technologies);
 
         if (this.selectedFile) {
           formData.append('picture', this.selectedFile);
         }
 
-        const url = "https://api.yourwebsite.com/projects";
-        const method = this.project ? 'put' : 'post';
-        const apiUrl = this.project ? `${url}/${this.project.id}` : url;
+        if (this.selectedZip) {
+          formData.append('projectPdf', this.selectedZip);
+        }
 
-        axios({
-          method: method,
-          url: apiUrl,
-          data: formData,
-          headers: {
-            'Content-Type': 'multipart/form-data'
+        if (this.project && this.project.id) {
+          formData.append('id', this.project.id);
+        }
+
+        const createUrl = "http://localhost:8080/api/project";
+        const updateUrl = "http://localhost:8080/api/project/updateProject";
+        const method = this.project ? 'post' : 'post';
+        const apiUrl = this.project ? updateUrl : createUrl;
+
+        try {
+          console.log(`Saving project to URL: ${apiUrl} with method: ${method}`);
+          const response = await axios({
+            method: method,
+            url: apiUrl,
+            data: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+
+          if (response.status === 200 || response.status === 201) {
+            this.invokeMenu("Project data saved successfully");
+            this.$emit('projectsReload');
+            this.$emit('closeForm');
+          } else {
+            this.invokeMenu(`Unexpected response status: ${response.status}`, "red");
           }
-        })
-        .then(response => {
-          this.invokeMenu("PROJECT DATA SAVED SUCCESSFULLY");
-          this.$emit('projectsReload');
-          this.$emit('closeForm');
-        })
-        .catch(error => {
-          this.invokeMenu("ERROR SAVING PROJECT DATA!!", "red");
+        } catch (error) {
+          this.invokeMenu("Error saving project data!", "red");
           console.error('Error saving project data:', error);
-        });
+        }
       }
     }
   }
@@ -264,6 +319,13 @@ export default {
   max-height: 200px;
   border-radius: 4px;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+}
+
+.no-image-placeholder {
+  padding: 10px;
+  border: 1px dashed #ccc;
+  text-align: center;
+  color: #aaa;
 }
 
 input[type="file"]::-webkit-file-upload-button {

@@ -3,7 +3,7 @@
       <button @click="goBack" class="btn-back">Back</button>
       <div class="project-details-card">
         <div class="header">
-          <img :src="project.picture" alt="Project Image" class="project-image" />
+          <img :src="getImageUrl(project.picture)" alt="Project Image" class="project-image" />
           <div class="project-header-details">
             <h2 class="project-name">{{ project.name }}</h2>
             <p class="project-description">{{ project.description }}</p>
@@ -75,7 +75,16 @@
         } else {
           alert('Please make the payment before downloading the project.');
         }
+      },
+
+      getImageUrl(base64String) {
+          if (base64String) {
+            return `data:image/jpeg;base64,${base64String}`;
+          }
+          return '';
       }
+
+
     }
   };
   </script>

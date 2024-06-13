@@ -11,7 +11,7 @@
 
       <div class="project-list">
         <div class="project-card" v-for="project in projects" :key="project.id" @click="viewDetails(project)">
-          <img :src="project.picture" alt="Project Image" class="project-image" />
+          <img :src="getImageUrl(project.picture)" alt="Project Image" class="project-image" />
           <div class="project-details">
             <h2 class="project-name">{{ project.name }}</h2>
             <p class="project-description">{{ project.description }}</p>
@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <ProjectDetails v-if="showDetails" :project="selectedProject" @closeDetails="closeDetails" />
+    <ProjectDetails v-if="showDetails" :project="selectedProject" @closeDetails="closeDetails"/>
 
     <AddProject :project="selectedProject" @closeForm="closeForm" @projectsReload="reloadProjects" v-if="show" />
   </main>
@@ -59,74 +59,13 @@ export default {
       this.selectedProject = null;
     },
     fetchProjects() {
-      this.projects = [
-                {
-                  id: 1,
-                  picture: 'src/assets/dairy-ms.jpg',
-                  name: 'Dairy MIS',
-                  description: 'This project provides a detailed system for managing dairy farms.',
-                  price: '$100',
-                  creationDate: '2024-01-01',
-                  features: ['Feature 1', 'Feature 2', 'Feature 3'],
-                  overview: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum',
-                  technologies: ['Vue JS', 'Spring Boot', 'MySQL']
-                },
-                {
-                  id: 31,
-                  picture: 'src/assets/attendance2.webp',
-                  name: 'Dairy MIS',
-                  description: 'A brief description of Project One.',
-                  price: '$100',
-                  creationDate: '2024-01-01',
-                  features: ['Feature 1', 'Feature 2', 'Feature 3'],
-                  reviews: [
-                    { content: 'Great project!', author: 'Alice' },
-                    { content: 'Very useful.', author: 'Bob' }
-                  ]
-                },
-                {
-                    id: 21,
-                    picture: 'src/assets/dairy-ms.jpg',
-                    name: 'Dairy MIS',
-                    description: 'A brief description of Project One.',
-                    price: '$100',
-                },
-                {
-                    id: 2,
-                    picture: 'src/assets/attendance2.webp',
-                    name: 'Class Attendance App',
-                    description: 'A brief description of Project Two.',
-                    price: '$200',
-                },
-                {
-                    id: 3,
-                    picture: 'src/assets/e-commerce.webp',
-                    name: 'E-commerce MS',
-                    description: 'A brief description of Project Three.',
-                    price: '$300',
-                },
-                {
-                    id: 4,
-                    picture: 'src/assets/inventory.webp',
-                    name: 'Inventory MS',
-                    description: 'A brief description of Project Three.',
-                    price: '$300',
-                },
-                {
-                    id: 5,
-                    picture: 'src/assets/POS.webp',
-                    name: 'POS',
-                    description: 'A brief description of Project Three.',
-                    price: '$300',
-                },
-                {
-                    id: 6,
-                    picture: 'src/assets/E-commerce2.webp',
-                    name: 'Techy',
-                    description: 'A brief description of Project Three.',
-                    price: '$300',
-                },
-      ];
+      axios.post('http://localhost:8080/api/project/listOfProjects')
+        .then(response => {
+          this.projects = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching projects:', error);
+        });
     },
     reloadProjects() {
       this.fetchProjects();
@@ -142,10 +81,17 @@ export default {
     closeDetails() {
       this.showDetails = false;
       this.selectedProject = null;
+    },
+    getImageUrl(base64String) {
+      if (base64String) {
+        return `data:image/jpeg;base64,${base64String}`;
+      }
+      return '';
     }
   }
 };
 </script>
+
 
 <style scoped>
 * {
