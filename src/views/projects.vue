@@ -1,4 +1,5 @@
 <template>
+  <popMenu :message="popMessage" :borderColor="popBorderColor" v-if="showPopMenu"/>
   <main id="manage-page">
     <div class="page-wrap" v-if="!showDetails">
       <div class="page-header">
@@ -10,7 +11,7 @@
       </button>
 
       <div class="project-list">
-        <div class="project-card" v-for="project in projects" :key="project.id">
+        <div class="project-card" v-for="project in projects" :key="project.id" @click="viewDetails(project)">
           <img :src="getImageUrl(project.picture)" alt="Project Image" class="project-image" />
           <div class="project-details">
             <h2 class="project-name">{{ project.name }}</h2>
@@ -39,14 +40,18 @@
 <script>
 import AddProject from './AddProject.vue';
 import ProjectDetails from './ProjectDetailsModal.vue';
+import popMenu from './popMenu.vue';
 import confirmDeleteMenu from './confirmDeleteMenu.vue';
 import axios from 'axios';
 
 export default {
   name: 'Projects',
-  components: { AddProject, ProjectDetails, confirmDeleteMenu },
+  components: { AddProject, ProjectDetails, confirmDeleteMenu, popMenu },
   data() {
     return {
+      showPopMenu: false,
+      popMessage: "",
+      popBorderColor: "gold",
       show: false,
       showDetails: false,
       showDeleteConfirmation: false,
@@ -126,12 +131,12 @@ export default {
       this.showDeleteConfirmation = false;
     },
     invokeMenu(value, borderColor = 'gold') {
-      this.deleteMessage = value;
-      this.deleteBorderColor = borderColor;
-      this.showDeleteConfirmation = true;
+      this.popMessage = value;
+      this.popBorderColor = borderColor;
+      this.showPopMenu = true;
 
       setTimeout(() => {
-        this.showDeleteConfirmation = false;
+        this.showPopMenu = false;
       }, 3000);
     }
   }
