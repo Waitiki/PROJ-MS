@@ -10,14 +10,17 @@
       </button>
 
       <div class="project-list">
-        <div class="project-card" v-for="project in projects" :key="project.id" @click="viewDetails(project)">
+        <div class="project-card" v-for="project in projects" :key="project.id">
           <img :src="getImageUrl(project.picture)" alt="Project Image" class="project-image" />
           <div class="project-details">
             <h2 class="project-name">{{ project.name }}</h2>
             <p class="project-description">{{ project.description }}</p>
             <div class="footer">
               <p class="project-price">{{ project.price }}</p>
-              <button @click.stop="editProject(project)" class="btn-edit">Edit</button>
+              <div class="action-btns">
+                <button @click.stop="editProject(project)" class="btn-edit">Edit</button>
+                <button @click.stop="confirmDelete(project)" class="btn-delete">Delete</button>
+              </div>
             </div>
           </div>
         </div>
@@ -27,23 +30,31 @@
     <ProjectDetails v-if="showDetails" :project="selectedProject" @closeDetails="closeDetails"/>
 
     <AddProject :project="selectedProject" @closeForm="closeForm" @projectsReload="reloadProjects" v-if="show" />
+
+    <confirmDeleteMenu :message="deleteMessage" :borderColor="deleteBorderColor" v-if="showDeleteConfirmation"
+      @confirm="deleteConfirmed" @cancel="cancelDelete" />
   </main>
 </template>
 
 <script>
 import AddProject from './AddProject.vue';
 import ProjectDetails from './ProjectDetailsModal.vue';
+import confirmDeleteMenu from './confirmDeleteMenu.vue';
 import axios from 'axios';
 
 export default {
-  name: 'ProjectList',
-  components: { AddProject, ProjectDetails },
+  name: 'Projects',
+  components: { AddProject, ProjectDetails, confirmDeleteMenu },
   data() {
     return {
       show: false,
       showDetails: false,
+      showDeleteConfirmation: false,
       selectedProject: null,
-      projects: []
+      projects: [],
+      deleteProjectId: null,
+      deleteMessage: '',
+      deleteBorderColor: 'gold'
     };
   },
   created() {
@@ -87,11 +98,45 @@ export default {
         return `data:image/jpeg;base64,${base64String}`;
       }
       return '';
+    },
+    confirmDelete(project) {
+      this.deleteProjectId = project.id;
+      this.deleteMessage = `ARE YOU SURE YOU WANT TO DELETE "${project.name}"?`;
+      this.showDeleteConfirmation = true;
+    },
+    deleteConfirmed() {
+      if (this.deleteProjectId) {
+        const url = `http://localhost:8080/api/project/deleteProject/${this.deleteProjectId}`;
+        axios.post(url)
+          .then(response => {
+            this.invokeMenu("PROJECT DELETED SUCCESSFULLY", "magenta");
+            this.reloadProjects(); // Refresh the projects list
+          })
+          .catch(error => {
+            console.error('Error deleting project:', error);
+          })
+          .finally(() => {
+            this.cancelDelete();
+          });
+      }
+    },
+    cancelDelete() {
+      this.deleteProjectId = null;
+      this.deleteMessage = '';
+      this.showDeleteConfirmation = false;
+    },
+    invokeMenu(value, borderColor = 'gold') {
+      this.deleteMessage = value;
+      this.deleteBorderColor = borderColor;
+      this.showDeleteConfirmation = true;
+
+      setTimeout(() => {
+        this.showDeleteConfirmation = false;
+      }, 3000);
     }
   }
 };
 </script>
-
 
 <style scoped>
 * {
@@ -181,27 +226,46 @@ export default {
   justify-content: space-between;
 }
 
+.action-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .project-price {
   font-size: 1.2em;
-  margin-top: .5rem;
+  margin-top: 0.5rem;
   color: #007bff;
 }
 
-.btn-edit {
+.btn-edit, .btn-delete {
   padding: 0.4rem;
-  background-color: rgba(74, 222, 128, 255);
   color: white;
   font-size: medium;
   font-weight: 600;
   cursor: pointer;
-  /* border: 1px solid rgba(74, 222, 128, 255); */
   margin-top: 10px;
   text-decoration: none;
-  border: 1px solid rgba(74, 222, 128, 255);
+  border: 1px solid;
+}
+
+.btn-edit {
+  background-color: rgba(74, 222, 128, 255);
+  border-color: rgba(74, 222, 128, 255);
 }
 
 .btn-edit:hover {
-  border: 1px solid black;
+  border-color: black;
+  background: white;
+  color: black;
+}
+
+.btn-delete {
+  background-color: rgba(239, 68, 68, 255);
+  border-color: rgba(239, 68, 68, 255);
+}
+
+.btn-delete:hover {
+  border-color: black;
   background: white;
   color: black;
 }
@@ -211,7 +275,7 @@ export default {
     width: 100%;
   }
 
-  .project-list,.page-header,.btn-add {
+  .project-list, .page-header, .btn-add {
     gap: 0.8rem;
     margin-left: 2rem;
   }

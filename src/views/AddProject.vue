@@ -35,9 +35,9 @@
             id="projectPdf" 
             @change="handleZipUpload" 
             class="form-control-file" 
-            accept=".zip"
+            accept=".zip, .rar, .tar.gz"
           />
-          <label for="projectPdf" class="file-label">Project Zip Folder</label>
+          <label for="projectPdf" class="file-label">Project Archive (ZIP/RAR/TAR.GZ)</label>
         </div>
 
         <div class="image-preview" v-if="formData.picture">
@@ -77,6 +77,7 @@ export default {
       popMessage: "",
       popBorderColor: "gold",
       formData: {
+        id: null,
         name: '',
         description: '',
         price: '',
@@ -104,103 +105,139 @@ export default {
       handler(newValue) {
         if (newValue) {
           this.formData = { ...newValue, picture: '', projectPdf: '' }; // Initialize picture and projectPdf as empty for new uploads
+          if (newValue.picture) {
+            this.formData.picture = `data:image/jpeg;base64,${newValue.picture}`;
+          }
+          if (newValue.projectPdf) {
+            this.formData.projectPdf = newValue.projectPdf;
+          }
         } else {
-          this.formData = { name: '', description: '', price: '', features: '', overview: '', technologies: '', picture: '', projectPdf: '' };
+          this.formData = { id: null, name: '', description: '', price: '', features: '', overview: '', technologies: '', picture: '', projectPdf: '' };
         }
       }
     }
   },
   methods: {
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file && ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          this.formData.picture = reader.result; // Update preview with base64 data URL
-        };
-        reader.readAsDataURL(file);
+      handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file && ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            this.formData.picture = reader.result; // Update preview with base64 data URL
+          };
+          reader.readAsDataURL(file);
 
-        this.selectedFile = file;
-      } else {
-        this.invokeMenu("Invalid file type. Only PNG, JPEG, JPG, and WEBP are allowed.", "red");
-        event.target.value = '';
-      }
-    },
-    handleZipUpload(event) {
-      const file = event.target.files[0];
-      if (file && file.type === 'application/zip') {
-        this.selectedZip = file;
-        this.formData.projectPdf = file.name; // Show the name of the zip file in the form
-      } else {
-        this.invokeMenu("Invalid file type. Only ZIP is allowed.", "red");
-        event.target.value = '';
-      }
-    },
-    invokeMenu(value, borderColor = 'gold') {
-      this.popMessage = value;
-      this.popBorderColor = borderColor;
-      this.show = true;
-
-      setTimeout(() => {
-        this.show = false;
-      }, 3000);
-    },
-    async saveProject() {
-      if (!this.formData.name || !this.formData.description || !this.formData.price || !this.formData.features || !this.formData.overview || !this.formData.technologies || !this.formData.picture || !this.formData.projectPdf) {
-        this.invokeMenu("Fill all fields!", "red");
-      } else {
-        this.invokeMenu("Saving project data...", "blue");
-
-        const formData = new FormData();
-        formData.append('name', this.formData.name);
-        formData.append('description', this.formData.description);
-        formData.append('price', this.formData.price);
-        formData.append('features', this.formData.features);
-        formData.append('overview', this.formData.overview);
-        formData.append('technologies', this.formData.technologies);
-
-        if (this.selectedFile) {
-          formData.append('picture', this.selectedFile);
+          this.selectedFile = file;
+        } else {
+          this.invokeMenu("Invalid file type. Only PNG, JPEG, JPG, and WEBP are allowed.", "red");
+          event.target.value = '';
         }
+      },
+      handleZipUpload(event) {
+        const file = event.target.files[0];
+        const validTypes = ['application/zip', 'application/x-rar-compressed', 'application/gzip'];
+        const validExtensions = ['.zip', '.rar', '.tar.gz'];
+        const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
 
-        if (this.selectedZip) {
-          formData.append('projectPdf', this.selectedZip);
+        // Checking if the file type and extension are valid
+        if (file && (validTypes.includes(file.type) || validExtensions.some(ext => file.name.endsWith(ext)))) {
+          this.selectedZip = file;
+          this.formData.projectPdf = file.name; // Show the name of the zip file in the form
+        } else {
+          this.invokeMenu("Invalid file type. Only ZIP, RAR, and TAR.GZ are allowed.", "red");
+          event.target.value = '';
         }
+      },
+      invokeMenu(value, borderColor = 'gold') {
+        this.popMessage = value;
+        this.popBorderColor = borderColor;
+        this.show = true;
 
-        if (this.project && this.project.id) {
-          formData.append('id', this.project.id);
-        }
+        setTimeout(() => {
+          this.show = false;
+        }, 3000);
+      },
+      async saveProject() {
+        if (!this.formData.name || !this.formData.description || !this.formData.price || !this.formData.features || !this.formData.overview || !this.formData.technologies || !this.formData.picture || !this.formData.projectPdf) {
+          this.invokeMenu("Fill all fields!", "red");
+        } else {
+          this.invokeMenu("Saving project data...", "blue");
 
-        const createUrl = "http://localhost:8080/api/project";
-        const updateUrl = "http://localhost:8080/api/project/updateProject";
-        const method = this.project ? 'post' : 'post';
-        const apiUrl = this.project ? updateUrl : createUrl;
+          const formData = new FormData();
+          formData.append('name', this.formData.name);
+          formData.append('description', this.formData.description);
+          formData.append('price', this.formData.price);
+          formData.append('features', this.formData.features);
+          formData.append('overview', this.formData.overview);
+          formData.append('technologies', this.formData.technologies);
 
-        try {
-          console.log(`Saving project to URL: ${apiUrl} with method: ${method}`);
-          const response = await axios({
-            method: method,
-            url: apiUrl,
-            data: formData,
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          });
-
-          if (response.status === 200 || response.status === 201) {
-            this.invokeMenu("Project data saved successfully");
-            this.$emit('projectsReload');
-            this.$emit('closeForm');
-          } else {
-            this.invokeMenu(`Unexpected response status: ${response.status}`, "red");
+          if (this.selectedFile) {
+            formData.append('picture', this.selectedFile);
+          } else if (this.project && this.project.picture) {
+            formData.append('picture', this.project.picture);
           }
-        } catch (error) {
-          this.invokeMenu("Error saving project data!", "red");
-          console.error('Error saving project data:', error);
+
+          if (this.selectedZip) {
+            formData.append('projectPdf', this.selectedZip);
+          } else if (this.project && this.project.projectPdf) {
+            formData.append('projectPdf', this.project.projectPdf);
+          }
+
+          if (this.project && this.project.id) {
+            formData.append('id', this.project.id);
+          }
+
+          const createUrl = "http://localhost:8080/api/project";
+          const updateUrl = "http://localhost:8080/api/project/updateProject";
+          const method = this.project ? 'post' : 'post';
+          const apiUrl = this.project ? updateUrl : createUrl;
+
+          try {
+            console.log(`Saving project to URL: ${apiUrl} with method: ${method}`);
+            const response = await axios({
+              method: method,
+              url: apiUrl,
+              data: formData,
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+
+            if (response.status === 200 || response.status === 201) {
+              const responseData = response.data;
+              switch (responseData.responseCode) {
+                case '001':
+                  this.invokeMenu(responseData.responseMessage, "red"); // Project exists
+                  break;
+                case '002':
+                  this.invokeMenu(responseData.responseMessage); // Project addition success
+                  this.$emit('projectsReload');
+                  break;
+                case '003':
+                  this.invokeMenu(responseData.responseMessage, "red"); // Project does not exist
+                  break;
+                case '004':
+                  this.invokeMenu(responseData.responseMessage, "green"); // Project deleted successfully
+                  this.$emit('projectsReload');
+                  break;
+                case '005':
+                  this.invokeMenu(responseData.responseMessage, "magenta"); // Project update success
+                  this.$emit('projectsReload');
+                  break;
+                default:
+                  this.invokeMenu(responseData.responseMessage, "red");
+              }
+            } else {
+              this.invokeMenu(`Unexpected response status: ${response.status}`, "red");
+            }
+          } catch (error) {
+            this.invokeMenu("Error saving project data!", "red");
+            console.error('Error saving project data:', error);
+          }
         }
       }
     }
-  }
+
 };
 </script>
 
