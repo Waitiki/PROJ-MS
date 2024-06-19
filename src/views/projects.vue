@@ -106,7 +106,8 @@ export default {
     },
     confirmDelete(project) {
       this.deleteProjectId = project.id;
-      this.deleteMessage = `ARE YOU SURE YOU WANT TO DELETE "${project.name}"?`;
+      this.deleteMessage = `Are you sure you want to delete "${project.name}"?`;
+      this.deleteBorderColor = "red";
       this.showDeleteConfirmation = true;
     },
     deleteConfirmed() {

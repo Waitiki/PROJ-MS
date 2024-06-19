@@ -7,7 +7,7 @@
       <div class="form-title">
         <h2>{{ project ? 'Edit Project' : 'New Project' }}</h2>
       </div>
-      <hr>
+      <hr />
       <div class="form-inputs">
         <div class="form-group" v-for="field in fields" :key="field.key">
           <input
@@ -47,14 +47,49 @@
           <img :src="`data:image/jpeg;base64,${project.picture}`" alt="Project Image Preview" class="preview-image"/>
         </div>
         <div v-else class="no-image-placeholder">No image uploaded</div>
+
+        <div class="form-group">
+          <!-- <label for="features">Project Features</label> -->
+          <input
+            id="features"
+            class="form-control"
+            v-model="newFeature"
+            placeholder="Add feature and press Enter"
+            @keydown.enter.prevent="addFeature"
+          />
+          <div class="multi-input-list">
+            <div v-for="(feature, index) in formData.features" :key="index" class="multi-input-item">
+              <span>{{ feature }}</span>
+              <button type="button" @click="removeFeature(index)">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <!-- <label for="technologies">Project Technologies</label> -->
+          <input
+            id="technologies"
+            class="form-control"
+            v-model="newTechnology"
+            placeholder="Add technology and press Enter"
+            @keydown.enter.prevent="addTechnology"
+          />
+          <div class="multi-input-list">
+            <div v-for="(technology, index) in formData.technologies" :key="index" class="multi-input-item">
+              <span>{{ technology }}</span>
+              <button type="button" @click="removeTechnology(index)">Remove</button>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <hr>
+      <hr />
       <div class="form-actions">
         <button @click="$emit('closeForm')">Close</button>
         <button @click="saveProject">{{ project ? 'Update' : 'Add' }}</button>
       </div>
     </div>
-    <popMenu :message="popMessage" :borderColor="popBorderColor" v-if="show"/>
+    <popMenu :message="popMessage" :borderColor="popBorderColor" v-if="show" />
   </div>
 </template>
 
@@ -81,19 +116,19 @@ export default {
         name: '',
         description: '',
         price: '',
-        features: '',
+        features: [],
         overview: '',
-        technologies: '',
+        technologies: [],
         picture: '',
         projectPdf: ''
       },
+      newFeature: '',
+      newTechnology: '',
       fields: [
         { key: 'name', label: 'Project Name', type: 'text' },
         { key: 'description', label: 'Project Description', type: 'text' },
         { key: 'price', label: 'Project Price', type: 'text' },
-        { key: 'features', label: 'Project Features', type: 'text' },
-        { key: 'overview', label: 'Project Overview', type: 'text' },
-        { key: 'technologies', label: 'Project Technologies', type: 'text' }
+        { key: 'overview', label: 'Project Overview', type: 'text' }
       ],
       selectedFile: null,
       selectedZip: null
@@ -112,132 +147,157 @@ export default {
             this.formData.projectPdf = newValue.projectPdf;
           }
         } else {
-          this.formData = { id: null, name: '', description: '', price: '', features: '', overview: '', technologies: '', picture: '', projectPdf: '' };
+          this.formData = { id: null, name: '', description: '', price: '', features: [], overview: '', technologies: [], picture: '', projectPdf: '' };
         }
       }
     }
   },
   methods: {
-      handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (file && ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            this.formData.picture = reader.result; // Update preview with base64 data URL
-          };
-          reader.readAsDataURL(file);
+    addFeature() {
+      if (this.newFeature.trim() !== '') {
+        this.formData.features.push(this.newFeature);
+        this.newFeature = '';
+      }
+    },
 
-          this.selectedFile = file;
-        } else {
-          this.invokeMenu("Invalid file type. Only PNG, JPEG, JPG, and WEBP are allowed.", "red");
-          event.target.value = '';
+    removeFeature(index) {
+      this.formData.features.splice(index, 1);
+    },
+
+    addTechnology() {
+      if (this.newTechnology.trim() !== '') {
+        this.formData.technologies.push(this.newTechnology);
+        this.newTechnology = '';
+      }
+    },
+
+    removeTechnology(index) {
+      this.formData.technologies.splice(index, 1);
+    },
+
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file && ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.formData.picture = reader.result; // Update preview with base64 data URL
+        };
+        reader.readAsDataURL(file);
+
+        this.selectedFile = file;
+      } else {
+        this.invokeMenu("Invalid file type. Only PNG, JPEG, JPG, and WEBP are allowed.", "red");
+        event.target.value = '';
+      }
+    },
+
+    handleZipUpload(event) {
+      const file = event.target.files[0];
+      const validTypes = ['application/zip', 'application/x-rar-compressed', 'application/gzip'];
+      const validExtensions = ['.zip', '.rar', '.tar.gz'];
+      const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+
+      // Checking if the file type and extension are valid
+      if (file && (validTypes.includes(file.type) || validExtensions.some(ext => file.name.endsWith(ext)))) {
+        this.selectedZip = file;
+        this.formData.projectPdf = file.name; // Show the name of the zip file in the form
+      } else {
+        this.invokeMenu("Invalid file type. Only ZIP, RAR, and TAR.GZ are allowed.", "red");
+        event.target.value = '';
+      }
+    },
+
+    invokeMenu(value, borderColor = 'gold') {
+      this.popMessage = value;
+      this.popBorderColor = borderColor;
+      this.show = true;
+
+      setTimeout(() => {
+        this.show = false;
+      }, 3000);
+    },
+
+    async saveProject() {
+      if (!this.formData.name || 
+          !this.formData.description || 
+          !this.formData.price || 
+          !this.formData.features.length || 
+          !this.formData.overview || 
+          !this.formData.technologies.length
+          ) {
+        this.invokeMenu("Fill all fields!", "red");
+      } else {
+        this.invokeMenu("Saving project data...", "blue");
+
+        const formData = new FormData();
+        formData.append('name', this.formData.name);
+        formData.append('description', this.formData.description);
+        formData.append('price', this.formData.price);
+        formData.append('overview', this.formData.overview);
+        formData.append("features", this.formData.features);
+        formData.append("technologies", this.formData.technologies);
+
+        if (this.selectedFile) {
+          formData.append('picture', this.selectedFile);
         }
-      },
-      handleZipUpload(event) {
-        const file = event.target.files[0];
-        const validTypes = ['application/zip', 'application/x-rar-compressed', 'application/gzip'];
-        const validExtensions = ['.zip', '.rar', '.tar.gz'];
-        const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
 
-        // Checking if the file type and extension are valid
-        if (file && (validTypes.includes(file.type) || validExtensions.some(ext => file.name.endsWith(ext)))) {
-          this.selectedZip = file;
-          this.formData.projectPdf = file.name; // Show the name of the zip file in the form
-        } else {
-          this.invokeMenu("Invalid file type. Only ZIP, RAR, and TAR.GZ are allowed.", "red");
-          event.target.value = '';
+        if (this.selectedZip) {
+          formData.append('projectPdf', this.selectedZip);
         }
-      },
-      invokeMenu(value, borderColor = 'gold') {
-        this.popMessage = value;
-        this.popBorderColor = borderColor;
-        this.show = true;
 
-        setTimeout(() => {
-          this.show = false;
-        }, 3000);
-      },
-      async saveProject() {
-        if (!this.formData.name || !this.formData.description || !this.formData.price || !this.formData.features || !this.formData.overview || !this.formData.technologies || !this.formData.picture || !this.formData.projectPdf) {
-          this.invokeMenu("Fill all fields!", "red");
-        } else {
-          this.invokeMenu("Saving project data...", "blue");
+        if (this.project && this.project.id) {
+          formData.append('id', this.project.id);
+        }
 
-          const formData = new FormData();
-          formData.append('name', this.formData.name);
-          formData.append('description', this.formData.description);
-          formData.append('price', this.formData.price);
-          formData.append('features', this.formData.features);
-          formData.append('overview', this.formData.overview);
-          formData.append('technologies', this.formData.technologies);
+        const createUrl = "http://localhost:8080/api/project";
+        const updateUrl = "http://localhost:8080/api/project/updateProject";
+        const apiUrl = this.project ? updateUrl : createUrl;
 
-          if (this.selectedFile) {
-            formData.append('picture', this.selectedFile);
-          } else if (this.project && this.project.picture) {
-            formData.append('picture', this.project.picture);
-          }
-
-          if (this.selectedZip) {
-            formData.append('projectPdf', this.selectedZip);
-          } else if (this.project && this.project.projectPdf) {
-            formData.append('projectPdf', this.project.projectPdf);
-          }
-
-          if (this.project && this.project.id) {
-            formData.append('id', this.project.id);
-          }
-
-          const createUrl = "http://localhost:8080/api/project";
-          const updateUrl = "http://localhost:8080/api/project/updateProject";
-          const method = this.project ? 'post' : 'post';
-          const apiUrl = this.project ? updateUrl : createUrl;
-
-          try {
-            console.log(`Saving project to URL: ${apiUrl} with method: ${method}`);
-            const response = await axios({
-              method: method,
-              url: apiUrl,
-              data: formData,
-              headers: {
-                'Content-Type': 'multipart/form-data'
-              }
-            });
-
-            if (response.status === 200 || response.status === 201) {
-              const responseData = response.data;
-              switch (responseData.responseCode) {
-                case '001':
-                  this.invokeMenu(responseData.responseMessage, "red"); // Project exists
-                  break;
-                case '002':
-                  this.invokeMenu(responseData.responseMessage); // Project addition success
-                  this.$emit('projectsReload');
-                  break;
-                case '003':
-                  this.invokeMenu(responseData.responseMessage, "red"); // Project does not exist
-                  break;
-                case '004':
-                  this.invokeMenu(responseData.responseMessage, "green"); // Project deleted successfully
-                  this.$emit('projectsReload');
-                  break;
-                case '005':
-                  this.invokeMenu(responseData.responseMessage, "magenta"); // Project update success
-                  this.$emit('projectsReload');
-                  break;
-                default:
-                  this.invokeMenu(responseData.responseMessage, "red");
-              }
-            } else {
-              this.invokeMenu(`Unexpected response status: ${response.status}`, "red");
+        try {
+          const response = await axios.post(apiUrl, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
             }
-          } catch (error) {
-            this.invokeMenu("Error saving project data!", "red");
-            console.error('Error saving project data:', error);
+          });
+
+          if (response.status === 200 || response.status === 201) {
+            const responseData = response.data;
+            switch (responseData.responseCode) {
+              case '001':
+                this.invokeMenu(responseData.responseMessage, "red"); // Project exists
+                break;
+              case '002':
+                this.invokeMenu(responseData.responseMessage); // Project addition success
+                this.$emit('projectsReload');
+                break;
+              case '003':
+                this.invokeMenu(responseData.responseMessage, "red"); // Project does not exist
+                break;
+              case '004':
+                this.invokeMenu(responseData.responseMessage, "green"); // Project deleted successfully
+                this.$emit('projectsReload');
+                break;
+              case '005':
+                this.invokeMenu(responseData.responseMessage, "magenta"); // Project update success
+                this.$emit('projectsReload');
+                break;
+               case '500':
+                this.invokeMenu(responseData.responseMessage, "red");
+                break;
+              default:
+                this.invokeMenu(responseData.responseMessage, "red");
+            }
+          } else {
+            this.invokeMenu(`Unexpected response status: ${response.status}`, "red");
           }
+        } catch (error) {
+          this.invokeMenu("Error saving project data!", "red");
+          console.error('Error saving project data:', error);
         }
       }
     }
-
+    
+  }
 };
 </script>
 
@@ -421,4 +481,24 @@ hr {
     border: 1px solid #4ADE80;
     margin: 20px 0;
   }
+
+  .multi-input-label {
+  margin-top: 10px;
+  display: block;
+}
+
+.multi-input-item {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.multi-input-item button {
+  margin-left: 10px;
+}
+
+.features-list, .technologies-list {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 </style>
