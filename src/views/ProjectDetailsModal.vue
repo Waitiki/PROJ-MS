@@ -271,11 +271,6 @@ export default {
   .project-header-details {
     width: 100%;
   }
-
-  .project-header-details {
-    /* padding-top: 20px; */
-  }
-
   .project-name {
     font-size: 1.3em;
   }
