@@ -185,12 +185,13 @@ export default {
     },
     searchProjects() {
       this.isLoading = true;
-      axios.get(`http://localhost:8080/api/project/search`, { params: { keyword: this.searchQuery } })
+      axios.post(`http://localhost:8080/api/project/search`, { params: { keyword: this.searchQuery } })
         .then(response => {
           this.projects = response.data;
         })
         .catch(error => {
           console.error('Error searching projects:', error);
+          // this.invokeMenu("ERROR SEARCHING PROJECTS", "red");
         })
         .finally(() => {
           this.isLoading = false;
@@ -209,7 +210,6 @@ export default {
 }
 
 .page-wrap {
-  padding: 20px;
   background-color: #f8f9fa;
 }
 
@@ -381,11 +381,21 @@ export default {
   color: #1e293b;
 }
 
+@media only screen and (min-width: 767px) {
+  .page-wrap {
+    padding: 20px;
+  }
+}
+
 @media only screen and (max-width: 767px) {
   .project-card {
     width: 100%;
   }
 
+  .page-wrap{
+    margin-left: 1.3rem;
+    width: 100%;
+  }
   .page-header {
     flex-direction: column;
     align-items: flex-start;

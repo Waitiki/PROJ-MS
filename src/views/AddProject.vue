@@ -228,9 +228,9 @@ export default {
           !this.formData.overview || 
           !this.formData.technologies.length
           ) {
-        this.invokeMenu("Fill all fields!", "red");
+        this.invokeMenu("FILL ALL FIELDS!", "red");
       } else {
-        this.invokeMenu("Saving project data...", "blue");
+        this.invokeMenu("UPLOADING PROJECT DATA...", "blue");
 
         const formData = new FormData();
         formData.append('name', this.formData.name);
@@ -295,7 +295,7 @@ export default {
             this.invokeMenu(`Unexpected response status: ${response.status}`, "red");
           }
         } catch (error) {
-          this.invokeMenu("Error saving project data!", "red");
+          this.invokeMenu("ERROR UPLOADING PROJECT DATA!", "red");
           console.error('Error saving project data:', error);
         } finally{
           this.isLoading = false;
