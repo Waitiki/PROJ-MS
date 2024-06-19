@@ -49,7 +49,6 @@
         <div v-else class="no-image-placeholder">No image uploaded</div>
 
         <div class="form-group">
-          <!-- <label for="features">Project Features</label> -->
           <input
             id="features"
             class="form-control"
@@ -57,16 +56,16 @@
             placeholder="Add feature and press Enter"
             @keydown.enter.prevent="addFeature"
           />
+          <label for="features">Project Features</label>
           <div class="multi-input-list">
             <div v-for="(feature, index) in formData.features" :key="index" class="multi-input-item">
               <span>{{ feature }}</span>
-              <button type="button" @click="removeFeature(index)">Remove</button>
+              <button type="button" @click="removeFeature(index)" class="removeBtn">-</button>
             </div>
           </div>
         </div>
 
         <div class="form-group">
-          <!-- <label for="technologies">Project Technologies</label> -->
           <input
             id="technologies"
             class="form-control"
@@ -74,10 +73,11 @@
             placeholder="Add technology and press Enter"
             @keydown.enter.prevent="addTechnology"
           />
+          <label for="technologies">Project Technologies</label>
           <div class="multi-input-list">
             <div v-for="(technology, index) in formData.technologies" :key="index" class="multi-input-item">
               <span>{{ technology }}</span>
-              <button type="button" @click="removeTechnology(index)">Remove</button>
+              <button type="button" @click="removeTechnology(index)" class="removeBtn">-</button>
             </div>
           </div>
         </div>
@@ -296,7 +296,7 @@ export default {
         }
       }
     }
-    
+
   }
 };
 </script>
@@ -495,6 +495,15 @@ hr {
 
 .multi-input-item button {
   margin-left: 10px;
+}
+
+.multi-input-list{
+  color: white;
+}
+
+.removeBtn{
+  color: #4ADE80;
+  font-size: 1.5rem;
 }
 
 .features-list, .technologies-list {

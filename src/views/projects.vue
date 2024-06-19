@@ -1,17 +1,25 @@
 <template>
-  <popMenu :message="popMessage" :borderColor="popBorderColor" v-if="showPopMenu"/>
+  <popMenu :message="popMessage" :borderColor="popBorderColor" v-if="showPopMenu" />
   <main id="manage-page">
     <div class="page-wrap" v-if="!showDetails">
       <div class="page-header">
-        <h3>Available Projects</h3>
+        <h3>Available-Projects</h3>
+        <div class="header-controls">
+          <input 
+            type="text" 
+            v-model="searchQuery" 
+            @input="searchProjects" 
+            placeholder="Search projects..." 
+            class="search-input"
+          />
+          <button @click="openForm" class="btn-add">
+            + Project
+          </button>
+        </div>
       </div>
 
-      <button @click="openForm" class="btn-add">
-        New Project
-      </button>
-
       <div class="project-list">
-        <div class="project-card" v-for="project in projects" :key="project.id" @click="viewDetails(project)">
+        <div class="project-card" v-for="project in paginatedProjects" :key="project.id" @click="viewDetails(project)">
           <img :src="getImageUrl(project.picture)" alt="Project Image" class="project-image" />
           <div class="project-details">
             <h2 class="project-name">{{ project.name }}</h2>
@@ -26,14 +34,17 @@
           </div>
         </div>
       </div>
+
+      <div class="pagination-controls">
+        <button :disabled="currentPage === 1" @click="currentPage--">Previous</button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button :disabled="currentPage === totalPages" @click="currentPage++">Next</button>
+      </div>
     </div>
 
-    <ProjectDetails v-if="showDetails" :project="selectedProject" @closeDetails="closeDetails"/>
-
+    <ProjectDetails v-if="showDetails" :project="selectedProject" @closeDetails="closeDetails" />
     <AddProject :project="selectedProject" @closeForm="closeForm" @projectsReload="reloadProjects" v-if="show" />
-
-    <confirmDeleteMenu :message="deleteMessage" :borderColor="deleteBorderColor" v-if="showDeleteConfirmation"
-      @confirm="deleteConfirmed" @cancel="cancelDelete" />
+    <confirmDeleteMenu :message="deleteMessage" :borderColor="deleteBorderColor" v-if="showDeleteConfirmation" @confirm="deleteConfirmed" @cancel="cancelDelete" />
   </main>
 </template>
 
@@ -59,8 +70,27 @@ export default {
       projects: [],
       deleteProjectId: null,
       deleteMessage: '',
-      deleteBorderColor: 'gold'
+      deleteBorderColor: 'gold',
+      searchQuery: '',
+      currentPage: 1,
+      itemsPerPage: 5,
     };
+  },
+  computed: {
+    filteredProjects() {
+      return this.projects.filter(project =>
+        project.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+    totalPages() {
+      return Math.ceil(this.filteredProjects.length / this.itemsPerPage);
+    },
+    paginatedProjects() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredProjects.slice(start, end);
+    }
   },
   created() {
     this.fetchProjects();
@@ -139,6 +169,15 @@ export default {
       setTimeout(() => {
         this.showPopMenu = false;
       }, 3000);
+    },
+    searchProjects() {
+      axios.get(`http://localhost:8080/api/project/search`, { params: { keyword: this.searchQuery } })
+        .then(response => {
+          this.projects = response.data;
+        })
+        .catch(error => {
+          console.error('Error searching projects:', error);
+        });
     }
   }
 };
@@ -153,22 +192,39 @@ export default {
 }
 
 .page-wrap {
-  /* padding: 20px; */
+  padding: 20px;
+  background-color: #f8f9fa;
 }
 
 .page-header {
-  /* text-align: center; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
 .page-header h3 {
   font-size: 1.5em;
-  color: rgba(30, 41, 59, 255);
+  color: #1e293b;
+}
+
+.header-controls {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.search-input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .btn-add {
   padding: 0.4rem;
-  background-color: rgba(74, 222, 128, 255);
+  background-color: #4ade80;
   color: white;
   width: 9rem;
   font-size: larger;
@@ -176,21 +232,21 @@ export default {
   cursor: pointer;
   text-align: center;
   justify-content: center;
-  border: 1px solid rgba(74, 222, 128, 255);
-  margin-bottom: 20px;
+  border: 1px solid #4ade80;
   text-decoration: none;
   display: flex;
   gap: 0.2rem;
 }
 
 .btn-add:hover {
-  box-shadow: 0px 0px 5px rgba(30, 41, 59, 255);
+  box-shadow: 0px 0px 5px #1e293b;
 }
 
 .project-list {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  justify-content: center;
 }
 
 .project-card {
@@ -199,6 +255,7 @@ export default {
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+  width: 100%;
   max-width: 300px;
 }
 
@@ -212,7 +269,7 @@ export default {
 }
 
 .project-details {
-  margin: 0.8rem;
+  padding: 0.8rem;
 }
 
 .project-name {
@@ -230,6 +287,7 @@ export default {
 .footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .action-btns {
@@ -239,7 +297,6 @@ export default {
 
 .project-price {
   font-size: 1.2em;
-  margin-top: 0.5rem;
   color: #007bff;
 }
 
@@ -249,14 +306,12 @@ export default {
   font-size: medium;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
-  text-decoration: none;
   border: 1px solid;
 }
 
 .btn-edit {
-  background-color: rgba(74, 222, 128, 255);
-  border-color: rgba(74, 222, 128, 255);
+  background-color: #4ade80;
+  border-color: #4ade80;
 }
 
 .btn-edit:hover {
@@ -266,8 +321,8 @@ export default {
 }
 
 .btn-delete {
-  background-color: rgba(239, 68, 68, 255);
-  border-color: rgba(239, 68, 68, 255);
+  background-color: #ef4444;
+  border-color: #ef4444;
 }
 
 .btn-delete:hover {
@@ -276,14 +331,50 @@ export default {
   color: black;
 }
 
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.pagination-controls button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #1e293b;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls span {
+  font-size: 1rem;
+  color: #1e293b;
+}
+
 @media only screen and (max-width: 767px) {
   .project-card {
     width: 100%;
   }
 
-  .project-list, .page-header, .btn-add {
-    gap: 0.8rem;
-    margin-left: 2rem;
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .project-list {
+    justify-content: center;
   }
 }
 </style>
