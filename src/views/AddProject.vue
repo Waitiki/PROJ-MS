@@ -90,16 +90,18 @@
       </div>
     </div>
     <popMenu :message="popMessage" :borderColor="popBorderColor" v-if="show" />
+    <LoadingSpinner v-if="isLoading"/>
   </div>
 </template>
 
 <script>
 import popMenu from './popMenu.vue';
+import LoadingSpinner from './LoadingSpinner.vue';
 import axios from 'axios';
 
 export default {
   name: 'AddProject',
-  components: { popMenu },
+  components: { popMenu, LoadingSpinner },
   props: {
     project: {
       type: Object,
@@ -120,7 +122,8 @@ export default {
         overview: '',
         technologies: [],
         picture: '',
-        projectPdf: ''
+        projectPdf: '',
+        isLoading: false
       },
       newFeature: '',
       newTechnology: '',
@@ -254,6 +257,7 @@ export default {
         const apiUrl = this.project ? updateUrl : createUrl;
 
         try {
+          this.isLoading = true;
           const response = await axios.post(apiUrl, formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
@@ -293,6 +297,8 @@ export default {
         } catch (error) {
           this.invokeMenu("Error saving project data!", "red");
           console.error('Error saving project data:', error);
+        } finally{
+          this.isLoading = false;
         }
       }
     }

@@ -1,5 +1,6 @@
 <template>
   <popMenu :message="popMessage" :borderColor="popBorderColor" v-if="showPopMenu" />
+  <LoadingSpinner v-if="isLoading"/>
   <main id="manage-page">
     <div class="page-wrap" v-if="!showDetails">
       <div class="page-header">
@@ -19,7 +20,11 @@
       </div>
 
       <div class="project-list">
-        <div class="project-card" v-for="project in paginatedProjects" :key="project.id" @click="viewDetails(project)">
+        <div v-if="paginatedProjects.length === 0" class="no-projects-message">
+          No projects available.
+        </div>
+
+        <div v-else class="project-card" v-for="project in paginatedProjects" :key="project.id" @click="viewDetails(project)">
           <img :src="getImageUrl(project.picture)" alt="Project Image" class="project-image" />
           <div class="project-details">
             <h2 class="project-name">{{ project.name }}</h2>
@@ -53,11 +58,12 @@ import AddProject from './AddProject.vue';
 import ProjectDetails from './ProjectDetailsModal.vue';
 import popMenu from './popMenu.vue';
 import confirmDeleteMenu from './confirmDeleteMenu.vue';
+import LoadingSpinner from './LoadingSpinner.vue';
 import axios from 'axios';
 
 export default {
   name: 'Projects',
-  components: { AddProject, ProjectDetails, confirmDeleteMenu, popMenu },
+  components: { AddProject, ProjectDetails, confirmDeleteMenu, popMenu, LoadingSpinner },
   data() {
     return {
       showPopMenu: false,
@@ -74,6 +80,7 @@ export default {
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: 5,
+      isLoading: false
     };
   },
   computed: {
@@ -105,12 +112,16 @@ export default {
       this.selectedProject = null;
     },
     fetchProjects() {
+      this.isLoading = true;
       axios.post('http://localhost:8080/api/project/listOfProjects')
         .then(response => {
           this.projects = response.data;
         })
         .catch(error => {
           console.error('Error fetching projects:', error);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     reloadProjects() {
@@ -142,6 +153,7 @@ export default {
     },
     deleteConfirmed() {
       if (this.deleteProjectId) {
+        this.isLoading = true;
         const url = `http://localhost:8080/api/project/deleteProject/${this.deleteProjectId}`;
         axios.post(url)
           .then(response => {
@@ -153,6 +165,7 @@ export default {
           })
           .finally(() => {
             this.cancelDelete();
+            this.isLoading = false;
           });
       }
     },
@@ -171,12 +184,16 @@ export default {
       }, 3000);
     },
     searchProjects() {
+      this.isLoading = true;
       axios.get(`http://localhost:8080/api/project/search`, { params: { keyword: this.searchQuery } })
         .then(response => {
           this.projects = response.data;
         })
         .catch(error => {
           console.error('Error searching projects:', error);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     }
   }
@@ -247,6 +264,13 @@ export default {
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
+}
+
+.no-projects-message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #777;
+  margin: 2rem 0;
 }
 
 .project-card {
