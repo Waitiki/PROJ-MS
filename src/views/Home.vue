@@ -1,4 +1,5 @@
 <template>
+  <LoadingSpinner v-if="isLoading"/>
   <main id="manage-page">
     <div class="page-wrap">
       <div class="page-header">
@@ -7,7 +8,7 @@
 
       <div class="project-list">
         <div class="project-card" v-for="project in projects" :key="project.id">
-          <img :src="project.picture" alt="Project Image" class="project-image" />
+          <img :src="getImageUrl(project.picture)" alt="Project Image" class="project-image" />
           <div class="project-details">
             <h2 class="project-name">{{ project.name }}</h2>
             <p class="project-description">{{ project.description }}</p>
@@ -22,57 +23,42 @@
 </template>
 
 <script>
+import LoadingSpinner from './LoadingSpinner.vue';
+import axios from 'axios';
 
 export default {
   name: 'ProjectList',
+  components: { LoadingSpinner },
   data() {
     return {
-      projects: [
-        {
-          id: 1,
-          picture: 'src/assets/dairy-ms.jpg',
-          name: 'Dairy MIS',
-          description: 'A brief description of Project One.',
-          price: '$100',
-        },
-        {
-          id: 2,
-          picture: 'src/assets/attendance2.webp',
-          name: 'C Attendance App',
-          description: 'A brief description of Project Two.',
-          price: '$200',
-        },
-        {
-          id: 3,
-          picture: 'src/assets/e-commerce.webp',
-          name: 'E-commerce MS',
-          description: 'A brief description of Project Three.',
-          price: '$300',
-        },
-        {
-          id: 4,
-          picture: 'src/assets/inventory.webp',
-          name: 'Inventory MS',
-          description: 'A brief description of Project Three.',
-          price: '$300',
-        },
-        {
-          id: 5,
-          picture: 'src/assets/POS.webp',
-          name: 'POS',
-          description: 'A brief description of Project Three.',
-          price: '$300',
-        },
-        {
-          id: 6,
-          picture: 'src/assets/E-commerce2.webp',
-          name: 'Techy',
-          description: 'A brief description of Project Three.',
-          price: '$300',
-        },
-      ],
+      isLoading: false,
+      projects: [],
     };
   },
+  methods: {
+    fetchProjects(){
+      this.isLoading = true;
+      axios.post('http://localhost:8080/api/project/listOfProjects')
+            .then(response => {
+                this.projects = response.data;
+            })
+            .catch(error => {
+              console.log("Error fetching projects", error);
+            })
+            .finally(() => {
+              this.isLoading = false;
+            })
+    },
+    getImageUrl(base64String) {
+      if (base64String) {
+        return `data:image/jpeg;base64,${base64String}`;
+      }
+      return '';
+    },
+  },
+  created(){
+    this.fetchProjects();
+  }
 };
 </script>
 

@@ -253,6 +253,9 @@ export default {
   .project-details-page, .header{
     padding: 20px;
   }
+  .btn-download{
+    margin-left: .8rem;
+  }
 }
 
 @media only screen and (max-width: 767px) {
