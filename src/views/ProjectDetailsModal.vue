@@ -135,7 +135,6 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 20px;
 }
 
 .project-image {
@@ -251,9 +250,8 @@ export default {
 }
 
 @media only screen and (min-width: 767px) {
-  .project-details-page{
+  .project-details-page, .header{
     padding: 20px;
-   
   }
 }
 
