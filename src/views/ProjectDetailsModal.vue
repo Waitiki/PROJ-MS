@@ -139,7 +139,7 @@ export default {
 
 .project-image {
   width: 50%;
-  max-height: 400px;
+  max-height: 250px;
   object-fit: cover;
   border-radius: 10px;
 }

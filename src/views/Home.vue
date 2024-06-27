@@ -108,7 +108,7 @@ export default {
 
 .project-image {
   width: 100%;
-  height: auto;
+  height: 200px;
 }
 
 .project-details {
